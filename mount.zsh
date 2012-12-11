@@ -10,7 +10,7 @@
 
 function m(){
 # list all devices
-a=`ls -dt /dev/**|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*"`
+a=`ls -dt --color=never /dev/**|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*"`
 j=0
 dev=()
 # walk thru devices, check if mounted, echo
