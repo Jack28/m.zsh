@@ -8,7 +8,20 @@
 # requires pmount
 #
 
-function m(){
+function mmountusage32882(){
+echo "$0 [-h, --help]"
+echo
+echo "	-h, --help,	print usage"
+echo
+echo "	stdin,	[1..n] mount/unmount"
+echo "			r	reload list"
+echo "			a	abort"
+echo
+echo "This prints a list of numbered mountable volumes and mounts a chosen device via pmount."
+echo "To mount oder unmount a volume enter its number. Any other input will lead to no operation."
+}
+
+function mmountmain8293872(){
 # list all devices
 a=`ls -dt --color=never /dev/**|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*"`
 j=0
@@ -29,8 +42,12 @@ if [ "$b" = "" ];then
 	b=1
 fi
 # is user input valid
+if [ "$b" = "r" ]; then
+	mmountmain8293872
+	b="a"
+fi
 if ! [[ $(echo {1..$j}) =~ $b ]];then
-	return 
+	return
 fi
 x=`mount|grep $dev[$b]`
 # use pmount to mount or unmount
@@ -41,3 +58,11 @@ else
 fi	
 }
 
+function m(){
+	if [ ! "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+		mmountusage32882
+		return
+	fi
+	
+	mmountmain8293872
+}
