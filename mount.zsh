@@ -5,7 +5,7 @@
 #
 # place this file in ~/.oh-my-zsh/custom/mount.zsh
 #
-# requires pmount
+# requires udevil
 #
 
 function mmountusage32882(){
@@ -23,7 +23,7 @@ echo "To mount oder unmount a volume enter its number. Any other input will lead
 
 function mmountmain8293872(){
 # list all devices
-a=`ls -dt --color=never /dev/**|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*"`
+a=`ls -dt --color=never /dev/**|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*" -oe "/dev/cdrom*"`
 j=0
 dev=()
 # walk thru devices, check if mounted, echo
@@ -31,8 +31,10 @@ echo $a | while read i;do
 	j=$((j+1))	
 	if [ "`mount|grep -o \"$i \"`" != "" ];then
 		echo -en "\e[1;32m"
+		m=`mount | grep "$i" | cut -d " " -f 3`
 	fi
-	echo -e "\t$j  $i\e[0m"
+	echo -e "\t$j  $i\t\t$m\e[0m"
+	m=""
 	dev[$j]=$i
 done
 echo "(1)"
@@ -52,9 +54,9 @@ fi
 x=`mount|grep $dev[$b]`
 # use pmount to mount or unmount
 if [ "$x" = "" ];then
-	echo "pmount $dev[$b]";pmount $dev[$b]
+	echo "udevil mount $dev[$b]";udevil mount $dev[$b]
 else
-	echo "pumount $dev[$b]";pumount $dev[$b]
+	echo "udevil umount $dev[$b]";udevil umount $dev[$b]
 fi	
 }
 
