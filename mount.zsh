@@ -7,6 +7,10 @@
 #
 # requires udevil
 #
+# to allow mounting of mapper devices change these lines in /etc/udevil/udevil.conf
+#   allowed_devices = /dev/*, /dev/mapper/*
+#   allowed_internal_devices = /dev/mapper/*
+# 
 
 function mmountusage32882(){
 echo "$0 [-h, --help]"
@@ -23,7 +27,11 @@ echo "To mount oder unmount a volume enter its number. Any other input will lead
 
 function mmountmain8293872(){
 # list all devices
-a=`ls -dt --color=never /dev/**|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*" -oe "/dev/cdrom*"`
+if [ -e /dev/mapper ]; then
+	a=`ls -dt --color=never /dev/** /dev/mapper/*|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*" -oe "/dev/cdrom*" -oe "/dev/mapper/[^c].*"`
+else
+	a=`ls -dt --color=never /dev/**|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*" -oe "/dev/cdrom*" -oe "/dev/mapper/[^c]*"`
+fi
 j=0
 dev=()
 # walk thru devices, check if mounted, echo
@@ -43,11 +51,12 @@ read b
 if [ "$b" = "" ];then
 	b=1
 fi
-# is user input valid
+# command from user
 if [ "$b" = "r" ]; then
 	mmountmain8293872
 	b="a"
 fi
+# invalid device number
 if ! [[ $(echo {1..$j}) =~ $b ]];then
 	return
 fi
