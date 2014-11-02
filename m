@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# simple mount function for bash
+# simple mount function
 #
 # by Jack (jack@ai4me.de)
 #
@@ -9,6 +9,7 @@
 #   allowed_devices = /dev/*, /dev/mapper/*
 #   allowed_internal_devices = /dev/mapper/*
 #
+
 
 function usage(){
 echo "$0 [-h, --help]"
@@ -23,12 +24,11 @@ echo "This prints a list of numbered mountable volumes and mounts a chosen devic
 echo "To mount oder unmount a volume enter its number. Any other input will lead to no operation."
 }
 
+
 function main(){
 # list all devices
 args="/dev/**"
 filter='-oe /dev/sd.* -oe /dev/mmcblk.* -oe /dev/cdrom*'
-
-
 
 if [ -e /dev/mapper ]; then
 	args="$args /dev/mapper/*"
@@ -42,8 +42,7 @@ devList=$(ls -dt --color=never ${args} | grep ${filter})
 declare -a dev
 j=0
 
-for i in $devList
-do
+for i in $devList; do
 	j=$((j+1))
 	if [ "`mount|grep -o \"$i \"`" != "" ];then
 		echo -en "\e[1;32m"
@@ -56,8 +55,10 @@ do
 	dev[$j]=$i
 done
 
+# get user choice
 echo "(1)"
 read b
+
 
 # no input use 1
 if [ "$b" = "" ];then
@@ -71,22 +72,21 @@ if [ "$b" = "r" ]; then
 fi
 
 # invalid device number
-if ! [[ $(echo {1..$j}) =~ $b ]];then
+if ! [[ $(seq 1 $j) =~ $b ]];then
+	echo "ERROR: invalid device number" >&2
 	return
 fi
 
-x=`mount|grep ${dev[$b]}`
-
-echo $dev
-
 # use udevil to mount or unmount
+x=`mount|grep ${dev[$b]}`
 if [ "$x" = "" ];then
 	echo "udevil mount ${dev[$b]}";
-	udevil mount ${dev[$b]}
+	ret=$(udevil mount ${dev[$b]})
 else
 	echo "udevil umount ${dev[$b]}";
-	udevil umount ${dev[$b]}
-fi	
+	ret=$(udevil umount ${dev[$b]})
+fi
+echo $ret
 }
 
 if [ ! "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
