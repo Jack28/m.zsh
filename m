@@ -1,18 +1,16 @@
+#!/usr/bin/env bash
+# simple mount function for bash
 #
-# simple mount function for zsh
-# 
 # by Jack (jack@ai4me.de)
-#
-# place this file in ~/.oh-my-zsh/custom/mount.zsh
 #
 # requires udevil
 #
 # to allow mounting of mapper devices change these lines in /etc/udevil/udevil.conf
 #   allowed_devices = /dev/*, /dev/mapper/*
 #   allowed_internal_devices = /dev/mapper/*
-# 
+#
 
-function mmountusage32882(){
+function usage(){
 echo "$0 [-h, --help]"
 echo
 echo "	-h, --help,	print usage"
@@ -25,55 +23,75 @@ echo "This prints a list of numbered mountable volumes and mounts a chosen devic
 echo "To mount oder unmount a volume enter its number. Any other input will lead to no operation."
 }
 
-function mmountmain8293872(){
+function main(){
 # list all devices
+args="/dev/**"
+filter='-oe /dev/sd.* -oe /dev/mmcblk.* -oe /dev/cdrom*'
+
+
+
 if [ -e /dev/mapper ]; then
-	a=`ls -dt --color=never /dev/** /dev/mapper/*|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*" -oe "/dev/cdrom*" -oe "/dev/mapper/[^c].*"`
-else
-	a=`ls -dt --color=never /dev/**|grep -oe "/dev/sd.*" -oe "/dev/mmcblk.*" -oe "/dev/cdrom*" -oe "/dev/mapper/[^c]*"`
+	args="$args /dev/mapper/*"
+	filter="$filter -oe /dev/mapper/[^c].*"
 fi
+
+devList=$(ls -dt --color=never ${args} | grep ${filter})
+
+
+# walk through devices, check if mounted, echo
+declare -a dev
 j=0
-dev=()
-# walk thru devices, check if mounted, echo
-echo $a | while read i;do
-	j=$((j+1))	
+
+for i in $devList
+do
+	j=$((j+1))
 	if [ "`mount|grep -o \"$i \"`" != "" ];then
 		echo -en "\e[1;32m"
 		m=`mount | grep "$i" | cut -d " " -f 3`
+	else
+		m=$(cat /sys/block/$(basename $i)/device/vendor > /dev/null 2>&1)
 	fi
 	echo -e "\t$j  $i\t\t$m\e[0m"
 	m=""
 	dev[$j]=$i
 done
+
 echo "(1)"
 read b
+
 # no input use 1
 if [ "$b" = "" ];then
 	b=1
 fi
+
 # command from user
 if [ "$b" = "r" ]; then
-	mmountmain8293872
+	main
 	b="a"
 fi
+
 # invalid device number
 if ! [[ $(echo {1..$j}) =~ $b ]];then
 	return
 fi
-x=`mount|grep $dev[$b]`
-# use pmount to mount or unmount
+
+x=`mount|grep ${dev[$b]}`
+
+echo $dev
+
+# use udevil to mount or unmount
 if [ "$x" = "" ];then
-	echo "udevil mount $dev[$b]";udevil mount $dev[$b]
+	echo "udevil mount ${dev[$b]}";
+	udevil mount ${dev[$b]}
 else
-	echo "udevil umount $dev[$b]";udevil umount $dev[$b]
+	echo "udevil umount ${dev[$b]}";
+	udevil umount ${dev[$b]}
 fi	
 }
 
-function m(){
-	if [ ! "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-		mmountusage32882
-		return
-	fi
-	
-	mmountmain8293872
-}
+if [ ! "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+	usage
+	return
+fi
+
+main
