@@ -1,11 +1,10 @@
-m.zsh
+m
 =====
 
-a simple mount function for zsh
+a simple mount tool
 
-source this script within your .zshrc to enable
 
-pmount is a dependency
+udevil is a dependency
 
 
 m [-h, --help]
@@ -16,5 +15,5 @@ m [-h, --help]
 			r	reload list
 			a	abort
 
-This prints a list of numbered mountable volumes and mounts a chosen device via pmount.
+This prints a list of numbered mountable volumes and mounts a chosen device via udevil.
 To mount oder unmount a volume enter its number. Any other input will lead to no operation.

@@ -10,6 +10,7 @@
 #   allowed_internal_devices = /dev/mapper/*
 #
 
+unset GREP_OPTIONS
 
 function usage(){
 echo "$0 [-h, --help]"
@@ -73,7 +74,7 @@ fi
 
 # invalid device number
 if ! [[ $(seq 1 $j) =~ $b ]];then
-	echo "ERROR: invalid device number" >&2
+	echo "No operation" >&2
 	return
 fi
 
